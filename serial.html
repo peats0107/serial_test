@@ -50,7 +50,10 @@
                   break;
                 }
                 // ▼ここでデコードの処理をしていたのを削除
-                console.log(value);
+                ver serialdata = value.split(/[:E]/);
+                ver current = serialdata[1];
+                ver exp = serialdata[2];
+                console.log(current);
               }
             } catch (error) {
               console.log("Error: Read");
