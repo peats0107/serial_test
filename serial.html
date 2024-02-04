@@ -3,39 +3,66 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Web Serial（Write）</title>
+    <title>Web Serial（Read）</title>
   </head>
 
   <body>
-    <h1>Web Serial</h1>
+    <h1>Web Serial（Read）</h1>
     <button onclick="onStartButtonClick()">接続</button>
-    <button id="write01">書き込み1</button>
-    <button id="write02">書き込み2</button>
 
     <script>
-      const button01 = document.getElementById("write01");
-      const button02 = document.getElementById("write02");
-      button01.addEventListener("click", function () {writeText('aaa\n');}, false);
-      button02.addEventListener("click", function () {writeText('bbb\n');}, false);
+      // ▼追加した部分1
+      class LineBreakTransformer {
+          constructor() {
+            this.chunks = "";
+          }
 
-      let port;
+          transform(chunk, controller) {
+            this.chunks += chunk;
+            const lines = this.chunks.split("\r\n");
+            this.chunks = lines.pop();
+            lines.forEach((line) => controller.enqueue(line));
+          }
+
+          flush(controller) {
+            controller.enqueue(this.chunks);
+          }
+      }
 
       async function onStartButtonClick() {
         try {
-          port = await navigator.serial.requestPort();
+          const port = await navigator.serial.requestPort();
           await port.open({ baudRate: 115200 });
-          console.log("接続");
-        } catch (e) {
-          console.log("Error");
-        }
-      }
 
-      async function writeText(text) {
-        const encoder = new TextEncoder();
-        const writer = port.writable.getWriter();
-        await writer.write(encoder.encode(text));
-        console.log("テキスト書き込み: " + text);
-        writer.releaseLock();
+          while (port.readable) {
+            // ▼追加した部分2
+            const textDecoder = new TextDecoderStream();
+            const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+            const reader = textDecoder.readable
+            .pipeThrough(new TransformStream(new LineBreakTransformer()))
+            .getReader();
+
+            try {
+              while (true) {
+                const { value, done } = await reader.read();
+                if (done) {
+                  console.log("Canceled");
+                  break;
+                }
+                // ▼ここでデコードの処理をしていたのを削除
+                console.log(value);
+              }
+            } catch (error) {
+              console.log("Error: Read");
+              console.log(error);
+            } finally {
+              reader.releaseLock();
+            }
+          }
+        } catch (error) {
+          console.log("Error: Open");
+          console.log(error);
+        }
       }
     </script>
   </body>
