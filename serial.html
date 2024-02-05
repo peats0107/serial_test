@@ -52,10 +52,10 @@
                 }
                 // ▼ここでデコードの処理をしていたのを削除
                 console.log(value);
-                var serialdata = value.split(/[:E]/);
+                var serialdata = value.split(/[ :E]/);
                 var current = Number(serialdata[0]);
                 var exp     = Number(serialdata[1]);
-                console.log(serialdata[1]);
+                console.log(exp);
                 //current = current * 10 ** exp;
                 document.getElementById("text1").innerHTML = current + "uA";
 
