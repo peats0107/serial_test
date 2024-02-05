@@ -55,7 +55,7 @@
                 var serialdata = value.split(/[:E]/);
                 var current = Number(serialdata[0]);
                 var exp     = Number(serialdata[1]);
-                console.log(exp);
+                console.log(serialdata[1]);
                 //current = current * 10 ** exp;
                 document.getElementById("text1").innerHTML = current + "uA";
 
