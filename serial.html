@@ -51,12 +51,12 @@
                   break;
                 }
                 // ▼ここでデコードの処理をしていたのを削除
-                ver serialdata = value.split(/[:E]/);
-                ver current = Number(serialdata[1]);
-                ver exp     = Number(serialdata[2]);
-                current = current * 10 ** exp;
                 console.log(value);
-                document.getElementById("text1").innerHTML = current + "uA";
+                //ver serialdata = value.split(/[:E]/);
+                //ver current = Number(serialdata[1]);
+                //ver exp     = Number(serialdata[2]);
+                //current = current * 10 ** exp;
+                //document.getElementById("text1").innerHTML = current + "uA";
 
               }
             } catch (error) {
