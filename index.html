@@ -1,6 +1,60 @@
+
 <!DOCTYPE html>
 <html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CO2Viewer Web by Epea</title>
+</head>
+
 <body>
-<h1>Hello World</h1>
+  <h1>CO2Viewer Web by Epea</h1>
+  <button onclick="startReading()">CO2センサー読み込み開始</button>
+  <div id="ppm">0</div>ppm
+  <script>
+    async function readOnce(port){
+      try {
+        const writer = port.writable.getWriter();
+        const data = new Uint8Array([255, 1, 134, 0, 0, 0, 0, 0, 121]);
+        await writer.write(data);
+        writer.releaseLock();
+
+        reader = port.readable.getReader();
+        const { value, done } = await reader.read();
+        if (done) {
+          reader.releaseLock();
+        }
+        document.getElementById("ppm").textContent = value[2] * 256 + value[3];
+      } catch (error) {
+        console.log("ERRORよ");
+        console.log(error);
+      } finally {
+        console.log("finally");
+        reader.releaseLock();
+      }
+    }
+
+    async function startReading() {
+      var reader;
+      var port;
+      try {
+        console.log("startReading");
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 9600 });
+        while (port.readable) {
+          await readOnce(port);
+          await new Promise(_ => setTimeout(_, 5000));
+        }
+      } catch (error) {
+        console.log("ERRORよ");
+        console.log(error);
+      } finally {
+        console.log("finally");
+        port.close();
+      }
+    }
+  </script>
 </body>
+
 </html>
