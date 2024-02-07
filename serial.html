@@ -9,7 +9,7 @@
   <body>
     <h1>Current Consumption Demo</h1>
     <button onclick="onStartButtonClick()">Connect</button>
-    <p id="text1">xxx.xx uA</p>
+    <p id="text1">xxxx.xx uA</p>
 
     <script>
       // 改行コードを切り分け
@@ -57,7 +57,7 @@
                 var exp     = Number(serialdata[1]);
                 //console.log(exp);
                 current = current * 10 ** exp;
-                document.getElementById("text1").innerHTML = current.toFixed(2) * 1000000 + " uA";
+                document.getElementById("text1").innerHTML = (current * 1000000).toFixed(2) + " uA";
 
               }
             } catch (error) {
