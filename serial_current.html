@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Current Consumption Demo</title>
+    <script type="text/javascript" src="http://smoothiecharts.org/smoothie.js"></script>
+  </head>
+
+  <body>
+    <h1>Current Consumption Demo</h1>
+    <button onclick="onStartButtonClick()">Connect</button>
+    <p id="text1">xxxx.xx uA</p>
+
+    <p id="subtitle">Current gragh</p>
+    <canvas id="chart_current" width="500" height="320"></canvas>
+
+    <script>
+      var line_current = new TimeSeries();
+
+      // 改行コードを切り分け
+      class LineBreakTransformer {
+          constructor() {
+            this.chunks = "";
+          }
+
+          transform(chunk, controller) {
+            this.chunks += chunk;
+            const lines = this.chunks.split("\r\n");
+            this.chunks = lines.pop();
+            lines.forEach((line) => controller.enqueue(line));
+          }
+
+          flush(controller) {
+            controller.enqueue(this.chunks);
+          }
+      }
+
+      async function onStartButtonClick() {
+        try {
+          const port = await navigator.serial.requestPort();
+          await port.open({ baudRate: 19200 });
+
+          while (port.readable) {
+            // ▼追加した部分2
+            const textDecoder = new TextDecoderStream();
+            const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+            const reader = textDecoder.readable
+            .pipeThrough(new TransformStream(new LineBreakTransformer()))
+            .getReader();
+
+            try {
+              while (true) {
+                const { value, done } = await reader.read();
+                if (done) {
+                  console.log("Canceled");
+                  break;
+                }
+                // ▼ここでデコードの処理をしていたのを削除
+                console.log(value);
+                var serialdata = value.split(/[ :E]/);
+                var current = Number(serialdata[0]);
+                var exp     = Number(serialdata[1]);
+                //console.log(exp);
+                current = current * 10 ** exp;
+                document.getElementById("text1").innerHTML = (current * 1000000).toFixed(2) + " uA";
+ 
+              }
+            } catch (error) {
+              console.log("Error: Read");
+              console.log(error);
+            } finally {
+              reader.releaseLock();
+            }
+          }
+        } catch (error) {
+          console.log("Error: Open");
+          console.log(error);
+        }
+      }
+
+    </script>
+  </body>
+</html>
