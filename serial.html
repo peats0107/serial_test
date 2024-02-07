@@ -6,10 +6,13 @@
     <title>Current Consumption Demo</title>
   </head>
 
-  <body>
+  <body onload="createTimeline()">
     <h1>Current Consumption Demo</h1>
     <button onclick="onStartButtonClick()">Connect</button>
     <p id="text1">xxxx.xx uA</p>
+
+    <p id="subtitle">Current gragh</p>
+    <canvas id="chart_current" width="500" height="320"></canvas>
 
     <script>
       // 改行コードを切り分け
@@ -72,6 +75,13 @@
           console.log(error);
         }
       }
+      var line_current = new TimeSeries();
+      function createTimeline() {
+          var chart1 = new SmoothieChart( { maxValue: 100000,   minValue: 0 });
+          chart1.addTimeSeries(line_current, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
+          chart1.streamTo(document.getElementById("chart_current"), 500);
+      }
+
     </script>
   </body>
 </html>
