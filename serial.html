@@ -15,6 +15,8 @@
     <canvas id="chart_current" width="500" height="320"></canvas>
 
     <script>
+      var line_current = new TimeSeries();
+
       // 改行コードを切り分け
       class LineBreakTransformer {
           constructor() {
@@ -61,7 +63,8 @@
                 //console.log(exp);
                 current = current * 10 ** exp;
                 document.getElementById("text1").innerHTML = (current * 1000000).toFixed(2) + " uA";
-
+                line_current.append(new Date().getTime(), current);
+ 
               }
             } catch (error) {
               console.log("Error: Read");
@@ -75,7 +78,6 @@
           console.log(error);
         }
       }
-      var line_current = new TimeSeries();
       function createTimeline() {
           var chart1 = new SmoothieChart( { maxValue: 100000,   minValue: 0 });
           chart1.addTimeSeries(line_current, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
