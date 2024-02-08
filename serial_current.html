@@ -4,14 +4,33 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Current Consumption Demo</title>
+    <script type="text/javascript" src="http://smoothiecharts.org/smoothie.js"></script>
   </head>
 
-  <body>
+  <body onload="createTimeline()">
     <h1>Current Consumption Demo</h1>
     <button onclick="onStartButtonClick()">Connect</button>
     <p id="text1">xxxx.xx uA</p>
+    
+    <p id="subtitle">Current Graph</p>
+    <canvas id="chart_current" width="500" height="320"></canvas>
 
     <script>
+    var cnt = 0.0;
+	var line_current = new TimeSeries();
+
+	function ontimer() {
+ // 		console.log("a");
+		cnt = cnt + 0.1;
+ // 		line_current.append(new Date().getTime(), Math.sin(cnt) * 1000 + 5000);
+	}
+
+	function createTimeline() {
+	    var chart1 = new SmoothieChart( { maxValue: 10000,   minValue: 0 });
+	    chart1.addTimeSeries(line_current, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
+	    chart1.streamTo(document.getElementById("chart_current"), 100);
+		setInterval( ontimer, 100);
+	}
 
       // 改行コードを切り分け
       class LineBreakTransformer {
@@ -60,6 +79,8 @@
                 current = current * 10 ** exp;
                 document.getElementById("text1").innerHTML = (current * 1000000).toFixed(2) + " uA";
  
+		  		line_current.append(new Date().getTime(), current);
+
               }
             } catch (error) {
               console.log("Error: Read");
