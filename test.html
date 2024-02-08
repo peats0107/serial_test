@@ -6,13 +6,29 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CO2Viewer Web by Epea</title>
+  <script type="text/javascript" src="http://smoothiecharts.org/smoothie.js"></script>
 </head>
 
-<body>
+<body onload="createTimeline()">
   <h1>CO2Viewer Web by Epea</h1>
   <button onclick="startReading()">CO2センサー読み込み開始</button>
   <div id="ppm">0</div>ppm
+    <div class="contents margin">
+        <button id="connect" class="button">connect</button>
+        <button id="disconnect" class="button">disconnect</button>
+        <button id="clear" class="button">clear log</button>
+       <hr>
+         <p id="subtitle">Gyro</p>
+         <canvas id="chart_gyro" width="500" height="320"></canvas>
+    </div>
   <script>
+var line_gryo_x = new TimeSeries();
+
+function createTimeline() {
+    var chart1 = new SmoothieChart( { maxValue: 10000,   minValue: -10000 });
+    chart1.addTimeSeries(line_gryo_x, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
+    chart1.streamTo(document.getElementById("chart_gyro"), 500);
+}
     async function readOnce(port){
       try {
         const writer = port.writable.getWriter();
