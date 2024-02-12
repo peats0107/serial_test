@@ -11,8 +11,8 @@
     <h1>Current Consumption Demo</h1>
     <button onclick="onAmmetorStartButtonClick()">Connect Ammeter</button>
     <button onclick="onEvbStartButtonClick()">Connect EVB</button>
-    <p> MODE    : <div id="mode">Current mode</div></p>
-    <p> Current : <div id="text1">xxxx.xx uA</div></p>
+    <p id="mode"> MODE    : Current mode</p>
+    <p id="text1"> Current : xxxx.xx uA</p>
     
     <p id="subtitle">Current Consumption Graph</p>
     <canvas id="chart_current" width="500" height="320"></canvas>
@@ -71,7 +71,7 @@
                 var exp     = Number(serialdata[1]);
                 //console.log(exp);
                 current = current * 10 ** exp;
-                document.getElementById("text1").innerHTML = (current * 1000000).toFixed(2) + " uA";
+                document.getElementById("text1").innerHTML = "MODE    : " + (current * 1000000).toFixed(2) + " uA";
  
 		  		line_current.append(new Date().getTime(), current * 1000000);
 
@@ -111,7 +111,7 @@
                 // ▼ここでデコードの処理をしていたのを削除
                 console.log(value);
                 var serialdata = value.split(/:/);
-                document.getElementById("mode").innerHTML = serialdata[1];
+                document.getElementById("mode").innerHTML = "MODE  :" + serialdata[1];
               }
             } catch (error) {
               console.log("Error: Read");
