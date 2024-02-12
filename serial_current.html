@@ -9,27 +9,21 @@
 
   <body onload="createTimeline()">
     <h1>Current Consumption Demo</h1>
-    <button onclick="onStartButtonClick()">Connect</button>
+    <button onclick="onAmmetorStartButtonClick()">Connect Ammeter</button>
+    <button onclick="onEvbStartButtonClick()">Connect EVB</button>
+    <p id="mode">Current mode</p>
     <p id="text1">xxxx.xx uA</p>
     
-    <p id="subtitle">Current Graph</p>
+    <p id="subtitle">Current Consumption Graph</p>
     <canvas id="chart_current" width="500" height="320"></canvas>
 
     <script>
-    var cnt = 0.0;
 	var line_current = new TimeSeries();
-
-	function ontimer() {
- // 		console.log("a");
-		cnt = cnt + 0.1;
-//  		line_current.append(new Date().getTime(), Math.sin(cnt) * 1000 + 5000);
-	}
 
 	function createTimeline() {
 	    var chart1 = new SmoothieChart( { maxValue: 10000,   minValue: 0 });
 	    chart1.addTimeSeries(line_current, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
 	    chart1.streamTo(document.getElementById("chart_current"), 100);
-//		setInterval( ontimer, 100);
 	}
 
       // 改行コードを切り分け
@@ -50,7 +44,7 @@
           }
       }
 
-      async function onStartButtonClick() {
+      async function onAmmetorStartButtonClick() {
         try {
           const port = await navigator.serial.requestPort();
           await port.open({ baudRate: 19200 });
@@ -81,6 +75,43 @@
  
 		  		line_current.append(new Date().getTime(), current * 1000000);
 
+              }
+            } catch (error) {
+              console.log("Error: Read");
+              console.log(error);
+            } finally {
+              reader.releaseLock();
+            }
+          }
+        } catch (error) {
+          console.log("Error: Open");
+          console.log(error);
+        }
+      }
+      async function onEvbStartButtonClick() {
+        try {
+          const port = await navigator.serial.requestPort();
+          await port.open({ baudRate: 115200 });
+
+          while (port.readable) {
+            // ▼追加した部分2
+            const textDecoder = new TextDecoderStream();
+            const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+            const reader = textDecoder.readable
+            .pipeThrough(new TransformStream(new LineBreakTransformer()))
+            .getReader();
+
+            try {
+              while (true) {
+                const { value, done } = await reader.read();
+                if (done) {
+                  console.log("Canceled");
+                  break;
+                }
+                // ▼ここでデコードの処理をしていたのを削除
+                console.log(value);
+                var serialdata = value.split(/:/);
+                document.getElementById("mode").innerHTML = serialdata[1];
               }
             } catch (error) {
               console.log("Error: Read");
